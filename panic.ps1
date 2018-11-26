@@ -99,6 +99,10 @@ foreach ($defi in 1..4 | Sort-Object {Get-Random})
             Start-Sleep 1
           }
         }
+        7
+        {
+          Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+        }
         10
         {
             # Planificateur des tâches désactivé en mode sans échec !
