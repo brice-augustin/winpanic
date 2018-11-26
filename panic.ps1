@@ -1,7 +1,7 @@
 function exec
 {
-	# -NoNewWindow does not seem to work in PowerShell ISE
-    Start-Process -FilePath $args[0] -ArgumentList "-File",$args[1] -WindowStyle Hidden
+  # -NoNewWindow does not seem to work in PowerShell ISE
+  Start-Process -FilePath $args[0] -ArgumentList "-File",$args[1] -WindowStyle Hidden
 }
 
 $contexte = @("rien")
@@ -40,7 +40,7 @@ Regardez l'observateur d'évènements pour déterminer ce qu'ils ont modifié."
 $prog_prefix = "C:\Windows\System128"
 $powershell_path = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
 $prog_list = @("explorer32.exe", "svchost32.exe", "smss32.exe", "csrss32.exe", "iexplore32.exe",
-						"acrotray32.exe", "services32.exe", "spoolsv32.exe", "savscan32.exe", "ctfmon32.exe")
+            "acrotray32.exe", "services32.exe", "spoolsv32.exe", "savscan32.exe", "ctfmon32.exe")
 
 New-Item -Path "$prog_prefix" -ItemType "directory"
 
@@ -70,36 +70,36 @@ foreach ($defi in 1..4 | Sort-Object {Get-Random})
         }
         4
         {
-					$ifIndex = (Get-NetAdapter -Physical | Where-Object status -eq "Up").ifIndex
-					# Release DHCP; works on 2012; not on 2016 ?
-					#$lan = WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object Index -eq $ifIndex
-					#$lan.ReleaseDHCPLease() | out-Null
-					# Configure static IP instead
-					New-NetIPAddress -InterfaceIndex 14 -IPAddress "198.51.100.1" -PrefixLength 24
+          $ifIndex = (Get-NetAdapter -Physical | Where-Object status -eq "Up").ifIndex
+          # Release DHCP; works on 2012; not on 2016 ?
+          #$lan = WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object Index -eq $ifIndex
+          #$lan.ReleaseDHCPLease() | out-Null
+          # Configure static IP instead
+          New-NetIPAddress -InterfaceIndex 14 -IPAddress "198.51.100.1" -PrefixLength 24
         }
         5
-				{
-					$ifIndex = (Get-NetAdapter -Physical | Where-Object status -eq "Up").ifIndex
-					Set-DnsClientserveraddress -InterfaceIndex 17 -ServerAddresses ("8.8.8.8")
-				}
-				6
-				{
-					foreach ($i in 1..5)
-					{
-						$pass = ConvertTo-SecureString -AsPlainText "keysersoze" -force
-						$c = New-Object System.Management.Automation.PSCredential("hank", $pass)
-						try
-						{
-							Start-Process .\notepad.exe -Credential $c
-						}
-						catch
-						{
-						}
+        {
+          $ifIndex = (Get-NetAdapter -Physical | Where-Object status -eq "Up").ifIndex
+          Set-DnsClientserveraddress -InterfaceIndex 17 -ServerAddresses ("8.8.8.8")
+        }
+        6
+        {
+          foreach ($i in 1..5)
+          {
+            $pass = ConvertTo-SecureString -AsPlainText "keysersoze" -force
+            $c = New-Object System.Management.Automation.PSCredential("hank", $pass)
+            try
+            {
+              Start-Process .\notepad.exe -Credential $c
+            }
+            catch
+            {
+            }
 
-						Start-Sleep 1
-					}
-				}
-				10
+            Start-Sleep 1
+          }
+        }
+        10
         {
             # Planificateur des tâches désactivé en mode sans échec !
             $action=New-ScheduledTaskAction -Execute "C:\Windows\System32\shutdown.exe /r /t 30"
@@ -121,5 +121,5 @@ foreach ($defi in 1..4 | Sort-Object {Get-Random})
 
     Read-Host
 
-		Start-Sleep 5
+    Start-Sleep 5
 }
