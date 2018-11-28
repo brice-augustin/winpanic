@@ -51,79 +51,79 @@ foreach ($prog in $prog_list)
 
 foreach ($defi in 1..4 | Sort-Object {Get-Random})
 {
-    $i = Get-Random -Maximum $prog_list.Length
-    $prog = "$prog_prefix\$prog_list[$i]"
+  $i = Get-Random -Maximum $prog_list.Length
+  $prog = "$prog_prefix\$prog_list[$i]"
 
-    switch ($defi)
+  switch ($defi)
+  {
+    1
     {
-        1
-        {
-            exec "$prog" ".\net.ps1"
-        }
-        2
-        {
-            exec "$prog" ".\cpu.ps1"
-        }
-        3
-        {
-            exec "$prog" ".\diskio.ps1"
-        }
-        4
-        {
-          $ifIndex = (Get-NetAdapter -Physical | Where-Object status -eq "Up").ifIndex
-          # Release DHCP; works on 2012; not on 2016 ?
-          #$lan = WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object Index -eq $ifIndex
-          #$lan.ReleaseDHCPLease() | out-Null
-          # Configure static IP instead
-          New-NetIPAddress -InterfaceIndex 14 -IPAddress "198.51.100.1" -PrefixLength 24
-        }
-        5
-        {
-          $ifIndex = (Get-NetAdapter -Physical | Where-Object status -eq "Up").ifIndex
-          Set-DnsClientserveraddress -InterfaceIndex 17 -ServerAddresses ("8.8.8.8")
-        }
-        6
-        {
-          foreach ($i in 1..5)
-          {
-            $pass = ConvertTo-SecureString -AsPlainText "keysersoze" -force
-            $c = New-Object System.Management.Automation.PSCredential("hank", $pass)
-            try
-            {
-              Start-Process .\notepad.exe -Credential $c
-            }
-            catch
-            {
-            }
-
-            Start-Sleep 1
-          }
-        }
-        7
-        {
-          Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
-        }
-        10
-        {
-            # Planificateur des tâches désactivé en mode sans échec !
-            $action=New-ScheduledTaskAction -Execute "C:\Windows\System32\shutdown.exe /r /t 30"
-            $trigger=New-ScheduledTaskTrigger -AtStartup
-            Register-ScheduledTask -TaskName "Service Actif" -Trigger $trigger -Action $action -Description "Reboot" -User "Administrateur" –Password vitrygtr
-            Restart-Computer
-        }
+      exec "$prog" ".\net.ps1"
     }
+    2
+    {
+      exec "$prog" ".\cpu.ps1"
+    }
+    3
+    {
+      exec "$prog" ".\diskio.ps1"
+    }
+    4
+    {
+      $ifIndex = (Get-NetAdapter -Physical | Where-Object status -eq "Up").ifIndex
+      # Release DHCP; works on 2012; not on 2016 ?
+      #$lan = WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object Index -eq $ifIndex
+      #$lan.ReleaseDHCPLease() | out-Null
+      # Configure static IP instead
+      New-NetIPAddress -InterfaceIndex 14 -IPAddress "198.51.100.1" -PrefixLength 24
+    }
+    5
+    {
+      $ifIndex = (Get-NetAdapter -Physical | Where-Object status -eq "Up").ifIndex
+      Set-DnsClientserveraddress -InterfaceIndex 17 -ServerAddresses ("8.8.8.8")
+    }
+    6
+    {
+      foreach ($i in 1..5)
+      {
+        $pass = ConvertTo-SecureString -AsPlainText "keysersoze" -force
+        $c = New-Object System.Management.Automation.PSCredential("hank", $pass)
+        try
+        {
+          Start-Process .\notepad.exe -Credential $c
+        }
+        catch
+        {
+        }
 
-    Write-Host "Nouvel incident !" -ForegroundColor Green
-    [console]::beep(500,300)
+        Start-Sleep 1
+      }
+    }
+    7
+    {
+      Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+    }
+    10
+    {
+      # Planificateur des tâches désactivé en mode sans échec !
+      $action=New-ScheduledTaskAction -Execute "C:\Windows\System32\shutdown.exe /r /t 30"
+      $trigger=New-ScheduledTaskTrigger -AtStartup
+      Register-ScheduledTask -TaskName "Service Actif" -Trigger $trigger -Action $action -Description "Reboot" -User "Administrateur" -Password vitrygtr
+      Restart-Computer
+    }
+  }
 
-    Write-Host "----------"
-    Write-Host $contexte[$defi]
-    Write-Host "----------"
+  Write-Host "Nouvel incident !" -ForegroundColor Green
+  [console]::beep(500,300)
 
-    Write-Host ""
-    Write-Host -NoNewline "Quand le problème est réglé, appuyez sur Entrée pour passer au suivant ..."
+  Write-Host "----------"
+  Write-Host $contexte[$defi]
+  Write-Host "----------"
 
-    Read-Host
+  Write-Host ""
+  Write-Host -NoNewline "Quand le problème est réglé, appuyez sur Entrée pour passer au suivant ..."
 
-    Start-Sleep 5
+  Read-Host
+
+  Start-Sleep 5
 }
