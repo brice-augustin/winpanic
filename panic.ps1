@@ -8,51 +8,58 @@ $contexte = @("rien")
 
 # 1
 $contexte += "Il y a une application qui pompe toute la bande passante !
-Trouvez son nom et dÃ©truisez-la."
+Trouvez son nom et détruisez-la."
 
 # 2
 $contexte += "Le PC est super lent. Une application monopolise le CPU !
-Trouvez le nom de cette application et dÃ©truisez-la."
+Trouvez le nom de cette application et détruisez-la."
 
 # 3
-$contexte += "Il y a un truc bizarre, l'activitÃ© du disque est permanente.
-Une application folle s'est mise Ã  Ã©crire de grandes quantitÃ©s de donnÃ©es dans un fichier.
-Trouvez ce fichier et l'application responsable du problÃ¨me, puis dÃ©truisez-les !"
+$contexte += "Il y a un truc bizarre, l'activité du disque est permanente.
+Une application folle s'est mise à écrire de grandes quantités de données dans un fichier.
+Trouvez ce fichier et l'application responsable du problème, puis détruisez-les !"
 
 # 4
 # No evt in 2016 when IP address changes ...
 # 2012 : evt from iphlpsvc, at least
-$contexte += "Le PC ne peut plus se connecter Ã  internet.
+$contexte += "Le PC ne peut plus se connecter à internet.
 Vous devriez jeter un coup d'oeil sur la configuration IP..."
 
 # 5
-$contexte += "Le PC ne peut plus se connecter Ã  internet.
+$contexte += "Le PC ne peut plus se connecter à internet.
 Vous devriez jeter un coup d'oeil sur la configuration IP..."
 
 # 6
-$contexte += "On soupÃ§onne que des pirates mexicains tentent de s'introduire
-dans notre rÃ©seau. Trouvez quel compte est attaquÃ©."
+$contexte += "On soupçonne que des pirates mexicains tentent de s'introduire
+dans notre réseau. Trouvez quel compte est attaqué."
 
 # 7
-$contexte += "Les services secrets mexicains ont rÃ©ussi Ã  pÃ©nÃ©trer notre rÃ©seau !
-Regardez l'observateur d'Ã©vÃ¨nements pour dÃ©terminer ce qu'ils ont modifiÃ©."
+$contexte += "Les services secrets mexicains ont réussi à pénétrer notre réseau !
+Regardez l'observateur d'évènements pour déterminer ce qu'ils ont modifié."
 
 $prog_prefix = "C:\Windows\System128"
 $powershell_path = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
 $prog_list = @("explorer32.exe", "svchost32.exe", "smss32.exe", "csrss32.exe", "iexplore32.exe",
             "acrotray32.exe", "services32.exe", "spoolsv32.exe", "savscan32.exe", "ctfmon32.exe")
 
-New-Item -Path "$prog_prefix" -ItemType "directory"
+if (! (Test-Path $prog_prefix))
+{
+  New-Item -Path "$prog_prefix" -ItemType "directory"
+}
 
 foreach ($prog in $prog_list)
 {
-    Copy-Item "$powershell_path" "$prog_prefix\$prog"
+  Copy-Item "$powershell_path" "$prog_prefix\$prog"
 }
 
-foreach ($defi in 1..4 | Sort-Object {Get-Random})
+$liste_defis = 1..5 + "7"
+
+$incident_count = 0
+
+foreach ($defi in $liste_defis | Sort-Object {Get-Random})
 {
   $i = Get-Random -Maximum $prog_list.Length
-  $prog = "$prog_prefix\$prog_list[$i]"
+  $prog = $prog_prefix + "\" + $prog_list[$i]
 
   switch ($defi)
   {
@@ -75,18 +82,20 @@ foreach ($defi in 1..4 | Sort-Object {Get-Random})
       #$lan = WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object Index -eq $ifIndex
       #$lan.ReleaseDHCPLease() | out-Null
       # Configure static IP instead
-      New-NetIPAddress -InterfaceIndex 14 -IPAddress "198.51.100.1" -PrefixLength 24
+      New-NetIPAddress -InterfaceIndex $ifIndex -IPAddress "198.51.100.1" -PrefixLength 24 | Out-Null
     }
     5
     {
       $ifIndex = (Get-NetAdapter -Physical | Where-Object status -eq "Up").ifIndex
-      Set-DnsClientserveraddress -InterfaceIndex 17 -ServerAddresses ("8.8.8.8")
+      Set-DnsClientserveraddress -InterfaceIndex $ifIndex -ServerAddresses ("8.8.8.8")
     }
     6
     {
+      # Evènement pas audité par défaut sous Windows 10
+      # Stratégies de sécurité locale > Auditer les évènements de connexion (Réussite, échec)
       foreach ($i in 1..5)
       {
-        $pass = ConvertTo-SecureString -AsPlainText "keysersoze" -force
+        $pass = ConvertTo-SecureString -AsPlainText "etudiant" -force
         $c = New-Object System.Management.Automation.PSCredential("hank", $pass)
         try
         {
@@ -101,11 +110,13 @@ foreach ($defi in 1..4 | Sort-Object {Get-Random})
     }
     7
     {
+      # Windows 10 : popup saying the firewall was disabled
+      # Disable security maintenance messages ?
       Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
     }
     10
     {
-      # Planificateur des tÃ¢ches dÃ©sactivÃ© en mode sans Ã©chec !
+      # Planificateur des tâches désactivé en mode sans échec !
       $action=New-ScheduledTaskAction -Execute "C:\Windows\System32\shutdown.exe /r /t 30"
       $trigger=New-ScheduledTaskTrigger -AtStartup
       Register-ScheduledTask -TaskName "Service Actif" -Trigger $trigger -Action $action -Description "Reboot" -User "Administrateur" -Password vitrygtr
@@ -113,7 +124,11 @@ foreach ($defi in 1..4 | Sort-Object {Get-Random})
     }
   }
 
-  Write-Host "Nouvel incident !" -ForegroundColor Green
+  $incident_count++
+
+  $msg = "Nouvel incident ! (Ticket #" + $incident_count + ")"
+
+  Write-Host $msg -ForegroundColor Green
   [console]::beep(500,300)
 
   Write-Host "----------"
@@ -121,7 +136,7 @@ foreach ($defi in 1..4 | Sort-Object {Get-Random})
   Write-Host "----------"
 
   Write-Host ""
-  Write-Host -NoNewline "Quand le problÃ¨me est rÃ©glÃ©, appuyez sur EntrÃ©e pour passer au suivant ..."
+  Write-Host -NoNewline "Quand le problème est réglé, appuyez sur Entrée pour passer au suivant ..."
 
   Read-Host
 

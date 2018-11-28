@@ -1,4 +1,4 @@
-﻿$files = @("C:\Windows\ie.log", "C:\Windows\keylogger.txt", "C:\Windows\megavirus.txt")
+﻿$files = @("C:\Windows\trojanXXX.log", "C:\Windows\keylogger.txt", "C:\Windows\megavirus.txt")
 
 $i = Get-Random -Maximum $files.Length
 $f = $files[$i]
