@@ -140,5 +140,8 @@ foreach ($defi in $liste_defis | Sort-Object {Get-Random})
 
   Read-Host
 
+  Write-Host "Attente du prochain incident ..."
   Start-Sleep 5
 }
+
+Write-Host "Vous avez résolu tous les incidents !" -ForegroundColor Yellow
